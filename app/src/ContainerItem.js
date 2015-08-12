@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import LineGraph from './LineGraph';
+import SmoothieGraph from './SmoothieGraph';
 
 export default class ContainerItem extends Component {
   render() {
@@ -8,7 +8,7 @@ export default class ContainerItem extends Component {
         <div className="content">
           <div className="header">modest_thompson</div>
           <div className="description">
-            <LineGraph />
+            <SmoothieGraph />
           </div>
         </div>
         <div className="ui bottom attached button">
