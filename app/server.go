@@ -2,6 +2,7 @@ package main
 
 import (
 	"encoding/json"
+	"fmt"
 	"math/rand"
 	"net/http"
 	"sync"
@@ -26,7 +27,7 @@ func NewMessageServer(size int, redisAddr string) (http.Handler, error) {
 	}
 	m.r.HandleFunc("/", m.getMessage).Methods("GET")
 	m.r.HandleFunc("/cache", m.getCache).Methods("GET")
-	// start filling the cache async
+	// start filling the cache async on boot
 	go m.fillCache(redisAddr)
 	return m, nil
 }
@@ -57,19 +58,19 @@ func (m *MessageServer) getCache(w http.ResponseWriter, r *http.Request) {
 }
 
 func (m *MessageServer) getMessage(w http.ResponseWriter, r *http.Request) {
-	m.cacheLock.Lock()
-	n := len(m.cache)
-	if n == 0 {
-		m.cacheLock.Unlock()
+	// sleep to simulate slow response times while cache is still filling
+	fill, msg, err := m.fetchNewMessage()
+	if err != nil {
+		logrus.Error(err)
 		http.Error(w, http.StatusText(http.StatusNoContent), http.StatusNoContent)
 		return
 	}
-	var resp response
-	resp.Message = m.cache[rand.Intn(n)]
-	m.cacheLock.Unlock()
-	resp.Fill = float64(float64(n)/m.cacheSize) * 100.0
-	// sleep to simulate slow response times while cache is still filling
-	sleepTime := time.Duration(10.0 - (10.0 * float64(float64(n)/m.cacheSize)))
+	resp := response{
+		Fill:    fill,
+		Message: msg,
+	}
+	// sleep to simulate slow response times
+	sleepTime := time.Duration(10.0 - (10.0 * (fill / 100.0)))
 	time.Sleep(sleepTime * time.Second)
 	if err := json.NewEncoder(w).Encode(resp); err != nil {
 		logrus.Error(err)
@@ -78,14 +79,15 @@ func (m *MessageServer) getMessage(w http.ResponseWriter, r *http.Request) {
 }
 
 func (m *MessageServer) fillCache(redisAddr string) {
+	// retry the connection if it fails the first time
 	for i := 0; i < 5; i++ {
 		conn, err := redis.Dial("tcp", redisAddr)
 		if err != nil {
 			time.Sleep(1 * time.Second)
 			continue
 		}
-		defer conn.Close()
 		data, err := redis.Strings(conn.Do("LRANGE", "messages", 0, -1))
+		conn.Close()
 		if err != nil {
 			time.Sleep(1 * time.Second)
 			continue
@@ -101,4 +103,15 @@ func (m *MessageServer) fillCache(redisAddr string) {
 	if len(m.cache) == 0 {
 		logrus.Fatalf("unable to fill cache from redis @ %q", redisAddr)
 	}
+}
+
+// fetchNewMessage returns the cache fill % along with a random message
+func (m *MessageServer) fetchNewMessage() (float64, string, error) {
+	m.cacheLock.Lock()
+	defer m.cacheLock.Unlock()
+	n := len(m.cache)
+	if n == 0 {
+		return 0.0, "", fmt.Errorf("no content in cache")
+	}
+	return float64(float64(n)/m.cacheSize) * 100.0, m.cache[rand.Intn(n)], nil
 }
