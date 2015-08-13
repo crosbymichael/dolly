@@ -17,7 +17,7 @@ var (
 )
 
 func init() {
-	flag.StringVar(&addr, "addr", "localhost:8123", "address for the server to bind to")
+	flag.StringVar(&addr, "addr", "127.0.0.1:8080", "address for the server to bind to")
 	flag.StringVar(&redisAddress, "redis", "localhost:6379", "redis server address")
 	flag.BoolVar(&debug, "debug", false, "enable debug output in the logs")
 }

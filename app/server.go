@@ -87,7 +87,7 @@ func (m *MessageServer) getMessage(w http.ResponseWriter, r *http.Request) {
 }
 
 func (m *MessageServer) fillCache(redisAddr string) {
-	f, err := os.Open("data.json")
+	f, err := os.Open("/data.json")
 	if err != nil {
 		logrus.Fatal(err)
 	}
