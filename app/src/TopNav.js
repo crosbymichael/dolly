@@ -29,11 +29,29 @@ export default class TopNav extends Component {
     });
   }
   render() {
+    var overrideNavStyle = {
+      color: 'white',
+      backgroundColor: '#3c5164',
+      borderRadius: '0'
+    };
+    var overrideStatStyle = {
+      color: 'white'
+    };
+    var menuStyle = {
+      borderLeft: '1px white solid'
+    };
+    var iconStyle = {
+      marginTop: '0.25rem',
+      marginLeft: '0.75rem'
+    };
     return (
-      <div className="ui pointing menu">
-        <div className="right menu">
+      <div className="ui pointing menu" style={overrideNavStyle}>
+        <div class="item">
+          <img src="styles/dist/images/mini-logo.svg" style={iconStyle}/>
+        </div>
+        <div className="right menu" style={menuStyle}>
           <div className="item">
-            <div className="statistic">
+            <div className="statistic" style={overrideStatStyle}>
               <div className="value">
                 {this.state.totalRequests}
               </div>

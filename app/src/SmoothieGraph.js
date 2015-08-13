@@ -28,8 +28,11 @@ export default class SmoothieGraph extends Component {
     this.initHost('host1');
   }
   render() {
+    var canvasStyle = {
+      width: '100%'
+    };
     return (
-      <canvas id="host1Cpu" ref="host1Cpu" width="185" height="100"></canvas>
+      <canvas id="host1Cpu" ref="host1Cpu" height="100" style={canvasStyle}></canvas>
     );
   }
 }
