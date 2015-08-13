@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"math/rand"
 	"net/http"
+	"os"
 	"sync"
 	"time"
 
@@ -20,10 +21,12 @@ type response struct {
 	Message string `json:"message"`
 }
 
-func NewMessageServer(size int, redisAddr string) (http.Handler, error) {
+func NewMessageServer(redisAddr string) (http.Handler, error) {
 	m := &MessageServer{
-		r:         mux.NewRouter(),
-		cacheSize: float64(size),
+		r: mux.NewRouter(),
+		pool: redis.NewPool(func() (redis.Conn, error) {
+			return redis.Dial("tcp", redisAddr)
+		}, 10),
 	}
 	m.r.HandleFunc("/", m.getMessage).Methods("GET")
 	m.r.HandleFunc("/cache", m.getCache).Methods("GET")
@@ -37,9 +40,13 @@ type MessageServer struct {
 	cache     []string
 	cacheSize float64
 	cacheLock sync.Mutex
+	pool      *redis.Pool
 }
 
 func (m *MessageServer) ServeHTTP(w http.ResponseWriter, r *http.Request) {
+	conn := m.pool.Get()
+	conn.Do("INCR", "requests", 1)
+	conn.Close()
 	m.r.ServeHTTP(w, r)
 }
 
@@ -72,6 +79,7 @@ func (m *MessageServer) getMessage(w http.ResponseWriter, r *http.Request) {
 	// sleep to simulate slow response times
 	sleepTime := time.Duration(10.0 - (10.0 * (fill / 100.0)))
 	time.Sleep(sleepTime * time.Second)
+	// send the request
 	if err := json.NewEncoder(w).Encode(resp); err != nil {
 		logrus.Error(err)
 		http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
@@ -79,29 +87,21 @@ func (m *MessageServer) getMessage(w http.ResponseWriter, r *http.Request) {
 }
 
 func (m *MessageServer) fillCache(redisAddr string) {
-	// retry the connection if it fails the first time
-	for i := 0; i < 5; i++ {
-		conn, err := redis.Dial("tcp", redisAddr)
-		if err != nil {
-			time.Sleep(1 * time.Second)
-			continue
-		}
-		data, err := redis.Strings(conn.Do("LRANGE", "messages", 0, -1))
-		conn.Close()
-		if err != nil {
-			time.Sleep(1 * time.Second)
-			continue
-		}
-		for _, d := range data {
-			m.cacheLock.Lock()
-			m.cache = append(m.cache, d)
-			m.cacheLock.Unlock()
-			time.Sleep(2 * time.Second)
-		}
-		return
+	f, err := os.Open("data.json")
+	if err != nil {
+		logrus.Fatal(err)
 	}
-	if len(m.cache) == 0 {
-		logrus.Fatalf("unable to fill cache from redis @ %q", redisAddr)
+	var data []string
+	if err := json.NewDecoder(f).Decode(&data); err != nil {
+		logrus.Fatal(err)
+	}
+	f.Close()
+	m.cacheSize = float64(len(data))
+	for _, d := range data {
+		m.cacheLock.Lock()
+		m.cache = append(m.cache, d)
+		m.cacheLock.Unlock()
+		time.Sleep(2 * time.Second)
 	}
 }
 

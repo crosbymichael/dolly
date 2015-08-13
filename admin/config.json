@@ -1,0 +1,10 @@
+{
+    "servers": [
+        {
+            "name": "linuxcon-demo-frontend-1",
+            "ip":"10.134.11.221:8910"
+        }
+    ],
+    "bind": "localhost:8567",
+    "redis": "10.134.14.47:6379"
+}
