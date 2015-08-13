@@ -31,15 +31,14 @@ func do(cmd string, args ...interface{}) (interface{}, error) {
 func getState(w http.ResponseWriter, r *http.Request) {
 	writeCORS(w)
 	type (
+		server struct {
+			Name string  `json:"name"`
+			Fill float64 `json:"fill"`
+			//			StatsEndpoint string  `json:"statsEndpoint"`
+		}
 		state struct {
 			TotalRequests float64  `json:"totalRequests"`
 			Servers       []server `json:"servers"`
-		}
-		server struct {
-			Name          string  `json:"name"`
-			Status        Status  `json:"status"`
-			Fill          float64 `json:"fill"`
-			StatsEndpoint string  `json:"statsEndpoint"`
 		}
 	)
 	req, err := getTotalRequests()
@@ -47,14 +46,13 @@ func getState(w http.ResponseWriter, r *http.Request) {
 		logrus.Error(err)
 	}
 	s := state{
-		TotalRequests: req,
+		TotalRequests: float64(req),
 	}
 	for _, n := range nodes {
 		s.Servers = append(s.Servers, server{
-			Name:          n.name,
-			Fill:          n.getFill(),
-			Status:        n.getStatus(),
-			StatsEndpoint: n.getStatsEndpoint(),
+			Name: n.name,
+			Fill: n.getFill(),
+			// StatsEndpoint: n.getStatsEndpoint(),
 		})
 	}
 	if err := json.NewEncoder(w).Encode(s); err != nil {
@@ -72,13 +70,8 @@ func getTotalRequests() (int64, error) {
 func startServer(w http.ResponseWriter, r *http.Request) {
 	writeCORS(w)
 	name := mux.Vars(r)["name"]
-	node, err := newNode(name)
-	if err != nil {
-		logrus.Error(err)
-		httpError(w, http.StatusNotFound)
-		return
-	}
-	if err := node.start(false); err != nil {
+	n := nodes[name]
+	if err := n.start(false); err != nil {
 		logrus.Error(err)
 	}
 }
@@ -86,13 +79,8 @@ func startServer(w http.ResponseWriter, r *http.Request) {
 func stopServer(w http.ResponseWriter, r *http.Request) {
 	writeCORS(w)
 	name := mux.Vars(r)["name"]
-	node, err := newNode(name)
-	if err != nil {
-		logrus.Error(err)
-		httpError(w, http.StatusNotFound)
-		return
-	}
-	if err := node.stop(); err != nil {
+	n := nodes[name]
+	if err := n.stop(); err != nil {
 		logrus.Error(err)
 	}
 }
@@ -101,18 +89,8 @@ func stopServer(w http.ResponseWriter, r *http.Request) {
 func cloneServer(w http.ResponseWriter, r *http.Request) {
 	writeCORS(w)
 	r.ParseForm()
-	n1, err := newNode(name)
-	if err != nil {
-		logrus.Error(err)
-		httpError(w, http.StatusNotFound)
-		return
-	}
-	n2, err := newNode(r.Form.Get("server"))
-	if err != nil {
-		logrus.Error(err)
-		httpError(w, http.StatusNotFound)
-		return
-	}
+	//	n1 := nodes[mux.Vars(r)["name"]]
+	//	n2 := ndoes[r.Form.Get("server")]
 }
 
 func httpError(w http.ResponseWriter, code int) {

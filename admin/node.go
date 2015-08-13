@@ -7,13 +7,6 @@ import (
 	"github.com/garyburd/redigo/redis"
 )
 
-type Status string
-
-const (
-	Running Status = "running"
-	Stopped Status = "stopped"
-)
-
 func newNode(name, ip string) (*node, error) {
 	return nil, nil
 }
@@ -47,14 +40,6 @@ func (n *node) getFill() float64 {
 		logrus.Error(err)
 	}
 	return f
-}
-
-func (n *node) getStatus() Status {
-	s, err := redis.String(do("GET", fmt.Sprintf("nodes.%s.status", n.name)))
-	if err != nil {
-		logrus.Error(err)
-	}
-	return Status(s)
 }
 
 func loadNodes() error {

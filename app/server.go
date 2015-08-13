@@ -6,6 +6,7 @@ import (
 	"math/rand"
 	"net/http"
 	"os"
+	"strings"
 	"sync"
 	"time"
 
@@ -22,8 +23,13 @@ type response struct {
 }
 
 func NewMessageServer(redisAddr string) (http.Handler, error) {
+	hostname, err := os.Hostname()
+	if err != nil {
+		return nil, err
+	}
 	m := &MessageServer{
-		r: mux.NewRouter(),
+		r:    mux.NewRouter(),
+		name: strings.Replace(hostname, "linuxcon-demo-", "", -1),
 		pool: redis.NewPool(func() (redis.Conn, error) {
 			return redis.Dial("tcp", redisAddr)
 		}, 10),
@@ -41,11 +47,12 @@ type MessageServer struct {
 	cacheSize float64
 	cacheLock sync.Mutex
 	pool      *redis.Pool
+	name      string
 }
 
 func (m *MessageServer) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	conn := m.pool.Get()
-	conn.Do("INCR", "requests", 1)
+	conn.Do("INCR", "requests")
 	conn.Close()
 	m.r.ServeHTTP(w, r)
 }
@@ -76,9 +83,11 @@ func (m *MessageServer) getMessage(w http.ResponseWriter, r *http.Request) {
 		Fill:    fill,
 		Message: msg,
 	}
-	// sleep to simulate slow response times
+	// sleep to simulate slow response times while cache is filling
 	sleepTime := time.Duration(10.0 - (10.0 * (fill / 100.0)))
-	time.Sleep(sleepTime * time.Second)
+	if sleepTime.Seconds() != 0 {
+		time.Sleep(sleepTime * time.Second)
+	}
 	// send the request
 	if err := json.NewEncoder(w).Encode(resp); err != nil {
 		logrus.Error(err)
@@ -97,12 +106,22 @@ func (m *MessageServer) fillCache(redisAddr string) {
 	}
 	f.Close()
 	m.cacheSize = float64(len(data))
-	for _, d := range data {
+	for i, d := range data {
 		m.cacheLock.Lock()
 		m.cache = append(m.cache, d)
 		m.cacheLock.Unlock()
 		time.Sleep(2 * time.Second)
+		f := (float64(i+1) / m.cacheSize) * 100.0
+		if _, err := m.do("SET", fmt.Sprintf("nodes.%s.fill", m.name), f); err != nil {
+			logrus.Error(err)
+		}
 	}
+}
+
+func (m *MessageServer) do(cmd string, args ...interface{}) (interface{}, error) {
+	conn := m.pool.Get()
+	defer conn.Close()
+	return conn.Do(cmd, args...)
 }
 
 // fetchNewMessage returns the cache fill % along with a random message
