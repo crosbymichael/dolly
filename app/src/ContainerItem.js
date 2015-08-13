@@ -3,6 +3,10 @@ import SmoothieGraph from './SmoothieGraph';
 
 export default class ContainerItem extends Component {
   render() {
+    var overrideButtonStyle = {
+      color: 'white',
+      backgroundColor: '#3c5164'
+    };
     return (
       <div className="card">
         <div className="content">
@@ -11,11 +15,13 @@ export default class ContainerItem extends Component {
             <SmoothieGraph />
           </div>
         </div>
-        <div className="ui bottom attached button">
-          <i className="play icon"></i>
-          Start
-        </div>
+        <div className="extra content">
+          <div className="ui two buttons">
+            <div className="ui basic green button">Start</div>
+            <div className="ui basic blue button">Clone</div>
+          </div>
       </div>
+    </div>
     );
   }
 }
