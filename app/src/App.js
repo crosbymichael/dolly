@@ -1,5 +1,6 @@
 import React, { Component } from 'react';
 import ContainersGrid from './ContainersGrid';
+import Footer from './Footer';
 import TopNav from './TopNav';
 
 export default class App extends Component {
@@ -8,6 +9,7 @@ export default class App extends Component {
       <div>
         <TopNav />
         <ContainersGrid />
+        <Footer />
       </div>
     );
   }

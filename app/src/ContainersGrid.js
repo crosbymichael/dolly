@@ -23,6 +23,16 @@ export default class ContainersGrid extends Component {
              "fill" : 100,
              "name" : "linuxcon1",
              "statsEndpoint" : "http://127.0.0.3002"
+          },
+          {
+             "statsEndpoint" : "http://127.0.0.3001",
+             "fill" : 32.6,
+             "name" : "linuxcon1"
+          },
+          {
+             "fill" : 83,
+             "name" : "linuxcon1",
+             "statsEndpoint" : "http://127.0.0.3002"
           }
        ]
     }
@@ -40,7 +50,7 @@ export default class ContainersGrid extends Component {
   }
   render() {
     return (
-      <div className="ui cards six column padded grid">
+      <div className="ui cards padded grid">
         {this.renderContainers()}
       </div>
     );
