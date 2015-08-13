@@ -34,7 +34,7 @@ export default class ContainersGrid extends Component {
   }
   renderContainers() {
     var _makeServerItem = function(server) {
-      return <ContainerItem name={server.name} />;
+      return <ContainerItem name={server.name} fillPct={server.fill} />;
     }
     return this.state.containersList.map(_makeServerItem);
   }

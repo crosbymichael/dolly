@@ -1,14 +1,14 @@
 {
-  "name": "react-hot-boilerplate",
+  "name": "dolly-ui",
   "version": "1.0.0",
-  "description": "Boilerplate for ReactJS project with hot code reloading",
+  "description": "UI to show live migration of redis servers",
   "scripts": {
     "start": "node server.js",
     "lint": "eslint src"
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/gaearon/react-hot-boilerplate.git"
+    "url": "https://github.com/crosbymichael/dolly.git"
   },
   "keywords": [
     "react",
@@ -16,17 +16,9 @@
     "boilerplate",
     "hot",
     "reload",
-    "hmr",
-    "live",
-    "edit",
+    "docker",
     "webpack"
   ],
-  "author": "Dan Abramov <dan.abramov@me.com> (http://github.com/gaearon)",
-  "license": "MIT",
-  "bugs": {
-    "url": "https://github.com/gaearon/react-hot-boilerplate/issues"
-  },
-  "homepage": "https://github.com/gaearon/react-hot-boilerplate",
   "devDependencies": {
     "babel-core": "^5.4.7",
     "babel-eslint": "^3.1.9",
@@ -38,6 +30,7 @@
   },
   "dependencies": {
     "better-console": "^0.2.4",
+    "classnames": "^2.1.3",
     "del": "^1.2.0",
     "extend": "^3.0.0",
     "map-stream": "0.0.6",
