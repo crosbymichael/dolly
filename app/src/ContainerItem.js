@@ -6,7 +6,7 @@ export default class ContainerItem extends Component {
     return (
       <div className="card">
         <div className="content">
-          <div className="header">modest_thompson</div>
+          <div className="header">{this.props.name || 'unknown'}</div>
           <div className="description">
             <SmoothieGraph />
           </div>
@@ -18,4 +18,8 @@ export default class ContainerItem extends Component {
       </div>
     );
   }
+}
+
+ContainerItem.propTypes = {
+  name: React.PropTypes.string
 }
