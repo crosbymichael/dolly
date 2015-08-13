@@ -44,10 +44,19 @@ export default class TopNav extends Component {
       marginTop: '0.25rem',
       marginLeft: '0.75rem'
     };
+    var headingStyle = {
+      margin: '1rem',
+      color: 'white'
+    };
     return (
       <div className="ui pointing menu" style={overrideNavStyle}>
-        <div class="item">
+        <div>
           <img src="styles/dist/images/mini-logo.svg" style={iconStyle}/>
+        </div>
+        <div>
+          <a href='https://dolly.dockerproject.org'>
+            <h3 style={headingStyle}>dolly.dockerproject.org</h3>
+          </a>
         </div>
         <div className="right menu" style={menuStyle}>
           <div className="item">
