@@ -8,7 +8,10 @@ import (
 )
 
 func newNode(name, ip string) (*node, error) {
-	return nil, nil
+	return &node{
+		ip:   ip,
+		name: name,
+	}, nil
 }
 
 var nodes map[string]*node
