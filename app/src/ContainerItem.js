@@ -1,6 +1,7 @@
 import React, { Component } from 'react';
 import SmoothieGraph from './SmoothieGraph';
 import classnames from 'classnames';
+import numeral from 'numeral';
 
 export default class ContainerItem extends Component {
   render() {
@@ -32,7 +33,14 @@ export default class ContainerItem extends Component {
             </div>
           </div>
           <div className="description">
-            <SmoothieGraph />
+            <div className="ui horizontal statistic">
+              <div className="value">
+                {numeral(this.props.responseTime).format('0.00')}
+              </div>
+              <div className="label">
+                ms
+              </div>
+            </div>
           </div>
         </div>
         <div className="extra content">
@@ -48,5 +56,6 @@ export default class ContainerItem extends Component {
 
 ContainerItem.propTypes = {
   name: React.PropTypes.string,
-  fillPct: React.PropTypes.number
+  fillPct: React.PropTypes.number,
+  responseTime: React.PropTypes.number
 }
