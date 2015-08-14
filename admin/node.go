@@ -45,6 +45,10 @@ func (n *node) getFill() float64 {
 	return f
 }
 
+func (n *node) getRPS() float64 {
+	return 10
+}
+
 func loadNodes() error {
 	nodes = make(map[string]*node)
 	servers, err := redis.StringMap(do("HGETALL", "servers"))

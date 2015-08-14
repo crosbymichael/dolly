@@ -13,10 +13,10 @@ export default class ContainerItem extends Component {
       width: this.props.fillPct + '%'
     };
     var barClassnames = classnames({
-      'red': this.props.fillPct > 90,
-      'orange': this.props.fillPct <= 90 && this.props.fillPct > 70,
-      'yellow': this.props.fillPct <= 70 && this.props.fillPct > 50,
-      'olive': this.props.fillPct <= 50,
+      'green': this.props.fillPct > 90,
+      'yellow': this.props.fillPct <= 90 && this.props.fillPct > 70,
+      'orange': this.props.fillPct <= 70 && this.props.fillPct > 50,
+      'red': this.props.fillPct <= 50,
       'ui': true,
       'progress': true
     });

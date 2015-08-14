@@ -34,7 +34,7 @@ func getState(w http.ResponseWriter, r *http.Request) {
 		server struct {
 			Name string  `json:"name"`
 			Fill float64 `json:"fill"`
-			//			StatsEndpoint string  `json:"statsEndpoint"`
+			RPS  float64 `json:"rps"`
 		}
 		state struct {
 			TotalRequests float64  `json:"totalRequests"`
@@ -52,7 +52,7 @@ func getState(w http.ResponseWriter, r *http.Request) {
 		s.Servers = append(s.Servers, server{
 			Name: n.name,
 			Fill: n.getFill(),
-			// StatsEndpoint: n.getStatsEndpoint(),
+			RPS:  n.getRPS(),
 		})
 	}
 	if err := json.NewEncoder(w).Encode(s); err != nil {
