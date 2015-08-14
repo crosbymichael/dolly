@@ -21,7 +21,7 @@ export default class ContainerItem extends Component {
       'progress': true
     });
     return (
-      <div className="card">
+      <div className="card four wide column">
         <div className="content">
           <div className="header">
             {this.props.name || 'unknown'}

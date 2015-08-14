@@ -20,7 +20,7 @@ export default class SmoothieGraph extends Component {
     }.bind(this), 1000);
 
     // Build the timeline
-    var timeline = new SmoothieChart({ millisPerPixel: 20, grid: { strokeStyle: '#555555', lineWidth: 1, millisPerLine: 1000, verticalSections: 4 }});
+    var timeline = new SmoothieChart({ millisPerPixel: 20, grid: { strokeStyle: '#555555', lineWidth: 0.5, millisPerLine: 1000, verticalSections: 4 }});
     timeline.addTimeSeries(cpuDataSet, seriesOption);
     timeline.streamTo(React.findDOMNode(this.refs[hostId + 'Cpu']), 1000);
   }
@@ -32,7 +32,7 @@ export default class SmoothieGraph extends Component {
       width: '100%'
     };
     return (
-      <canvas id="host1Cpu" ref="host1Cpu" height="100" style={canvasStyle}></canvas>
+      <canvas id="host1Cpu" ref="host1Cpu" height="150" style={canvasStyle}></canvas>
     );
   }
 }
