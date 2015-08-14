@@ -31,6 +31,7 @@ func do(cmd string, args ...interface{}) (interface{}, error) {
 // getState returns the entire state of the cluster.
 func getState(w http.ResponseWriter, r *http.Request) {
 	writeCORS(w)
+	w.Header().Add("Content-Type", "application/json")
 	req, err := getTotalRequests()
 	if err != nil {
 		logrus.Error(err)
@@ -62,6 +63,7 @@ func getTotalRequests() (int64, error) {
 // startServer starts the web server instance with a cold cache.
 func startServer(w http.ResponseWriter, r *http.Request) {
 	writeCORS(w)
+	w.Header().Add("Content-Type", "application/json")
 	name := mux.Vars(r)["name"]
 	n := nodes[name]
 	if err := n.start(false); err != nil {
@@ -71,6 +73,7 @@ func startServer(w http.ResponseWriter, r *http.Request) {
 
 func stopServer(w http.ResponseWriter, r *http.Request) {
 	writeCORS(w)
+	w.Header().Add("Content-Type", "application/json")
 	name := mux.Vars(r)["name"]
 	n := nodes[name]
 	if err := n.stop(); err != nil {
@@ -81,6 +84,7 @@ func stopServer(w http.ResponseWriter, r *http.Request) {
 // cloneServer clones the server one and starts it somewhere else.
 func cloneServer(w http.ResponseWriter, r *http.Request) {
 	writeCORS(w)
+	w.Header().Add("Content-Type", "application/json")
 	r.ParseForm()
 	//	n1 := nodes[mux.Vars(r)["name"]]
 	//	n2 := ndoes[r.Form.Get("server")]
@@ -91,7 +95,6 @@ func httpError(w http.ResponseWriter, code int) {
 }
 
 func writeCORS(w http.ResponseWriter) {
-	w.Header().Add("Content-Type", "application/json")
 	w.Header().Add("Access-Control-Allow-Origin", "*")
 	w.Header().Add("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept, X-Registry-Auth")
 	w.Header().Add("Access-Control-Allow-Methods", "GET, POST, DELETE, PUT, OPTIONS")

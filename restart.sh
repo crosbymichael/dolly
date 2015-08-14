@@ -10,5 +10,5 @@ redis-cli -h 104.236.142.140 del nodes.frontend-2.avg
 redis-cli -h 104.236.142.140 del nodes.frontend-3.avg
 
 ssh root@45.55.8.248 supervisorctl start web
-sleep 60
+sleep 96
 ssh root@162.243.132.79 supervisorctl start web
