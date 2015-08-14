@@ -11,35 +11,30 @@ export default class ContainersGrid extends Component {
     };
   }
   componentDidMount() {
-    var result = {
-       "totalRequests" : 2020,
-       "servers" : [
-          {
-             "statsEndpoint" : "http://127.0.0.3001",
-             "fill" : 66.6,
-             "name" : "linuxcon1"
-          },
-          {
-             "fill" : 100,
-             "name" : "linuxcon1",
-             "statsEndpoint" : "http://127.0.0.3002"
-          },
-          {
-             "statsEndpoint" : "http://127.0.0.3001",
-             "fill" : 32.6,
-             "name" : "linuxcon1"
-          }
-     ]
-    }
+    var result;
+    var _this = this;
 
-    this.setState({
-      totalRequests: result.totalRequests,
-      containersList: result.servers
-    });
+    (function poll(){
+       setTimeout(function(){
+         request.get('http://localhost:8765/')
+           .end(function(err, res){
+               if (err) {
+                 console.log(err);
+               } else {
+                 result = JSON.parse(res.text);
+                 console.log(result);
+                 _this.setState({
+                   totalRequests: result.totalRequests,
+                   containersList: result.servers
+                 });
+                 poll();
+               }
+           })}, 2000);
+    })();
   }
   renderContainers() {
     var _makeServerItem = function(server) {
-      return <ContainerItem name={server.name} fillPct={server.fill} />;
+      return <ContainerItem name={server.name} fillPct={server.fill} responseTime={server.responseTime} />;
     }
     return this.state.containersList.map(_makeServerItem);
   }
