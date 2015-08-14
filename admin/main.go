@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"flag"
 	"net/http"
+	"sort"
 
 	"github.com/Sirupsen/logrus"
 	"github.com/garyburd/redigo/redis"
@@ -30,17 +31,6 @@ func do(cmd string, args ...interface{}) (interface{}, error) {
 // getState returns the entire state of the cluster.
 func getState(w http.ResponseWriter, r *http.Request) {
 	writeCORS(w)
-	type (
-		server struct {
-			Name         string  `json:"name"`
-			Fill         float64 `json:"fill"`
-			ResponseTime float64 `json:"responseTime"`
-		}
-		state struct {
-			TotalRequests float64  `json:"totalRequests"`
-			Servers       []server `json:"servers"`
-		}
-	)
 	req, err := getTotalRequests()
 	if err != nil {
 		logrus.Error(err)
@@ -55,6 +45,9 @@ func getState(w http.ResponseWriter, r *http.Request) {
 			ResponseTime: n.getResponseTime(),
 		})
 	}
+	ss := serverSorter(s.Servers)
+	sort.Sort(ss)
+	// SORT servers array
 	if err := json.NewEncoder(w).Encode(s); err != nil {
 		logrus.Error(err)
 	}
@@ -98,6 +91,7 @@ func httpError(w http.ResponseWriter, code int) {
 }
 
 func writeCORS(w http.ResponseWriter) {
+	w.Header().Add("Content-Type", "application/json")
 	w.Header().Add("Access-Control-Allow-Origin", "*")
 	w.Header().Add("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept, X-Registry-Auth")
 	w.Header().Add("Access-Control-Allow-Methods", "GET, POST, DELETE, PUT, OPTIONS")
