@@ -5,6 +5,13 @@ import numeral from 'numeral';
 import request from 'superagent';
 
 export default class ContainerItem extends Component {
+  constructor(props) {
+    super(props);
+    this.state = {
+      started: false,
+      cloned: false
+    };
+  }
   handleStart(evt) {
     console.log(this);
     console.log(evt);
@@ -18,6 +25,10 @@ export default class ContainerItem extends Component {
           console.log(err);
         }
       });
+    this.state = {
+      started: true,
+      cloned: false
+    };
   }
   handleClone(evt) {
     evt.preventDefault();
@@ -30,6 +41,10 @@ export default class ContainerItem extends Component {
           console.log(err);
         }
       });
+    this.state = {
+      started: false,
+      cloned: true
+    };
   }
   render() {
     var overrideButtonStyle = {
@@ -48,6 +63,23 @@ export default class ContainerItem extends Component {
       'ui': true,
       'progress': true
     });
+    var startButtonClassnames = classnames({
+      ui: true,
+      basic: true,
+      button: true,
+      green: true,
+      active: this.state.started
+    });
+    var cloneButtonClassnames = classnames({
+      ui: true,
+      basic: true,
+      button: true,
+      blue: true,
+      active: this.state.cloned
+    });
+    var startState = this.state.started ? 'Started' : 'Start';
+    var cloneState = this.state.cloned ? 'Cloned' : 'Clone';
+
     return (
       <div className="card four wide column">
         <div className="content">
@@ -71,12 +103,13 @@ export default class ContainerItem extends Component {
           </div>
         </div>
         <div className="extra content">
+          <div className="ui bottom attached label">{this.props.serverMessage || 'Idle.'}</div>
           <div className="ui two buttons">
-            <div className="ui basic green button" onClick={this.handleStart.bind(this)}>Start</div>
-            <div className="ui basic blue button" onClick={this.handleClone.bind(this)}>Clone</div>
+            <button className={startButtonClassnames} onClick={this.handleStart.bind(this)}>{startState}</button>
+            <button className={cloneButtonClassnames} onClick={this.handleClone.bind(this)}>{cloneState}</button>
           </div>
+        </div>
       </div>
-    </div>
     );
   }
 }
