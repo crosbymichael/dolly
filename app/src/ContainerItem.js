@@ -2,8 +2,35 @@ import React, { Component } from 'react';
 import SmoothieGraph from './SmoothieGraph';
 import classnames from 'classnames';
 import numeral from 'numeral';
+import request from 'superagent';
 
 export default class ContainerItem extends Component {
+  handleStart(evt) {
+    console.log(this);
+    console.log(evt);
+    evt.preventDefault();
+    request
+      .post('http://localhost:8765/' + this.props.name + '/start')
+      .send({})
+      .end(function(err, res){
+        // Calling the end function will send the request
+        if (err) {
+          console.log(err);
+        }
+      });
+  }
+  handleClone(evt) {
+    evt.preventDefault();
+    request
+      .post('http://localhost:8765/' + this.props.name + '/clone')
+      .send({})
+      .end(function(err, res){
+        // Calling the end function will send the request
+        if (err) {
+          console.log(err);
+        }
+      });
+  }
   render() {
     var overrideButtonStyle = {
       color: 'white',
@@ -45,8 +72,8 @@ export default class ContainerItem extends Component {
         </div>
         <div className="extra content">
           <div className="ui two buttons">
-            <div className="ui basic green button">Start</div>
-            <div className="ui basic blue button">Clone</div>
+            <div className="ui basic green button" onClick={this.handleStart.bind(this)}>Start</div>
+            <div className="ui basic blue button" onClick={this.handleClone.bind(this)}>Clone</div>
           </div>
       </div>
     </div>
