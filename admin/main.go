@@ -99,6 +99,10 @@ func writeCORS(w http.ResponseWriter) {
 	w.Header().Add("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept, X-Registry-Auth")
 	w.Header().Add("Access-Control-Allow-Methods", "GET, POST, DELETE, PUT, OPTIONS")
 }
+func cors(w http.ResponseWriter, r *http.Request) {
+	writeCORS(w)
+	logrus.Info("cors")
+}
 
 func main() {
 	if err := loadNodes(); err != nil {
@@ -106,13 +110,13 @@ func main() {
 	}
 	// router setup
 	r := mux.NewRouter()
+
 	r.HandleFunc("/", getState).Methods("GET")
 	r.HandleFunc("/{name:.*}/start", startServer).Methods("POST")
-	r.HandleFunc("/{name:.*}/stop", stopServer).Methods("POST")
+	r.HandleFunc("/{name:.*}/start", cors).Methods("OPTIONS")
 	r.HandleFunc("/{name:.*}/clone", cloneServer).Methods("POST")
-	r.HandleFunc("", func(w http.ResponseWriter, r *http.Request) {
-		writeCORS(w)
-	}).Methods("OPTIONS")
+	r.HandleFunc("/{name:.*}/clone", cors).Methods("OPTIONS")
+	r.HandleFunc("", cors).Methods("OPTIONS")
 
 	// start the server
 	if err := http.ListenAndServe("127.0.0.1:8765", r); err != nil {
