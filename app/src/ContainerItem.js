@@ -65,7 +65,7 @@ export default class ContainerItem extends Component {
                 {numeral(this.props.responseTime).format('0.00')}
               </div>
               <div className="label">
-                ms
+                rps
               </div>
             </div>
           </div>

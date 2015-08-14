@@ -42,7 +42,7 @@ func NewMessageServer(redisAddr string, fast bool) (http.Handler, error) {
 	// start filling the cache async on boot
 	go m.fillCache(redisAddr, fast)
 	go func() {
-		for range time.Tick(5 * time.Second) {
+		for range time.Tick(3 * time.Second) {
 			if _, err := m.do("SET", fmt.Sprintf("nodes.%s.avg", m.name), requests.Rate1()); err != nil {
 				logrus.Error(err)
 			}

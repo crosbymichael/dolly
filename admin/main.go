@@ -86,6 +86,14 @@ func cloneServer(w http.ResponseWriter, r *http.Request) {
 	writeCORS(w)
 	w.Header().Add("Content-Type", "application/json")
 	r.ParseForm()
+	name := mux.Vars(r)["name"]
+	n := nodes[name]
+	if err := n.stop(); err != nil {
+		logrus.Error(err)
+	}
+	if err := n.clone(); err != nil {
+		logrus.Error(err)
+	}
 	//	n1 := nodes[mux.Vars(r)["name"]]
 	//	n2 := ndoes[r.Form.Get("server")]
 }

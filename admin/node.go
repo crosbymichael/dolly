@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"os/exec"
 
 	"github.com/Sirupsen/logrus"
 	"github.com/garyburd/redigo/redis"
@@ -28,11 +29,13 @@ func (n *node) stop() error {
 }
 
 func (n *node) start(checkpoint bool) error {
-	return nil
+	cmd := exec.Command("ssh", fmt.Sprintf("root@%s", n.ip), "supervisorctl", "start", "web")
+	return cmd.Run()
 }
 
 func (n *node) clone() error {
-	return nil
+	cmd := exec.Command("ssh", fmt.Sprintf("root@%s", n.ip), "supervisorctl", "start", "web")
+	return cmd.Run()
 }
 
 func (n *node) send(n2 *node) error {
