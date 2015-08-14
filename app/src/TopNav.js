@@ -58,18 +58,6 @@ export default class TopNav extends Component {
             <h3 style={headingStyle}>dolly.dockerproject.org</h3>
           </a>
         </div>
-        <div className="right menu" style={menuStyle}>
-          <div className="item">
-            <div className="statistic" style={overrideStatStyle}>
-              <div className="value">
-                {this.state.totalRequests}
-              </div>
-              <div className="label">
-                Requests
-              </div>
-            </div>
-          </div>
-        </div>
       </div>
     );
   }
