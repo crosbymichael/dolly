@@ -13,7 +13,10 @@ import (
 	"github.com/Sirupsen/logrus"
 	"github.com/garyburd/redigo/redis"
 	"github.com/gorilla/mux"
+	"github.com/rcrowley/go-metrics"
 )
+
+var requests metrics.Timer
 
 type response struct {
 	// Fill is the % of the cache that is currently full
@@ -38,6 +41,13 @@ func NewMessageServer(redisAddr string) (http.Handler, error) {
 	m.r.HandleFunc("/cache", m.getCache).Methods("GET")
 	// start filling the cache async on boot
 	go m.fillCache(redisAddr)
+	go func() {
+		for range time.Tick(5 * time.Second) {
+			if _, err := m.do("SET", fmt.Sprintf("nodes.%s.avg", m.name), requests.RateMean()); err != nil {
+				logrus.Error(err)
+			}
+		}
+	}()
 	return m, nil
 }
 
@@ -54,7 +64,9 @@ func (m *MessageServer) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	conn := m.pool.Get()
 	conn.Do("INCR", "requests")
 	conn.Close()
+	start := time.Now()
 	m.r.ServeHTTP(w, r)
+	requests.Update(time.Now().Sub(start))
 }
 
 func (m *MessageServer) getCache(w http.ResponseWriter, r *http.Request) {

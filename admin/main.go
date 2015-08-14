@@ -32,9 +32,9 @@ func getState(w http.ResponseWriter, r *http.Request) {
 	writeCORS(w)
 	type (
 		server struct {
-			Name string  `json:"name"`
-			Fill float64 `json:"fill"`
-			RPS  float64 `json:"rps"`
+			Name         string  `json:"name"`
+			Fill         float64 `json:"fill"`
+			ResponseTime float64 `json:"responseTime"`
 		}
 		state struct {
 			TotalRequests float64  `json:"totalRequests"`
@@ -50,9 +50,9 @@ func getState(w http.ResponseWriter, r *http.Request) {
 	}
 	for _, n := range nodes {
 		s.Servers = append(s.Servers, server{
-			Name: n.name,
-			Fill: n.getFill(),
-			RPS:  n.getRPS(),
+			Name:         n.name,
+			Fill:         n.getFill(),
+			ResponseTime: n.getResponseTime(),
 		})
 	}
 	if err := json.NewEncoder(w).Encode(s); err != nil {

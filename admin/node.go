@@ -8,10 +8,11 @@ import (
 )
 
 func newNode(name, ip string) (*node, error) {
-	return &node{
+	n := &node{
 		ip:   ip,
 		name: name,
-	}, nil
+	}
+	return n, nil
 }
 
 var nodes map[string]*node
@@ -19,6 +20,7 @@ var nodes map[string]*node
 type node struct {
 	ip   string
 	name string
+	rps  float64
 }
 
 func (n *node) stop() error {
@@ -45,8 +47,12 @@ func (n *node) getFill() float64 {
 	return f
 }
 
-func (n *node) getRPS() float64 {
-	return 10
+func (n *node) getResponseTime() float64 {
+	f, err := redis.Float64(do("GET", fmt.Sprintf("nodes.%s.avg", n.name)))
+	if err != nil {
+		logrus.Error(err)
+	}
+	return f
 }
 
 func loadNodes() error {
