@@ -25,7 +25,7 @@ type response struct {
 	Message string `json:"message"`
 }
 
-func NewMessageServer(redisAddr string) (http.Handler, error) {
+func NewMessageServer(redisAddr string, fast bool) (http.Handler, error) {
 	hostname, err := os.Hostname()
 	if err != nil {
 		return nil, err
@@ -40,10 +40,10 @@ func NewMessageServer(redisAddr string) (http.Handler, error) {
 	m.r.HandleFunc("/", m.getMessage).Methods("GET")
 	m.r.HandleFunc("/cache", m.getCache).Methods("GET")
 	// start filling the cache async on boot
-	go m.fillCache(redisAddr)
+	go m.fillCache(redisAddr, fast)
 	go func() {
 		for range time.Tick(5 * time.Second) {
-			if _, err := m.do("SET", fmt.Sprintf("nodes.%s.avg", m.name), requests.RateMean()); err != nil {
+			if _, err := m.do("SET", fmt.Sprintf("nodes.%s.avg", m.name), requests.Rate1()); err != nil {
 				logrus.Error(err)
 			}
 		}
@@ -61,9 +61,6 @@ type MessageServer struct {
 }
 
 func (m *MessageServer) ServeHTTP(w http.ResponseWriter, r *http.Request) {
-	conn := m.pool.Get()
-	conn.Do("INCR", "requests")
-	conn.Close()
 	start := time.Now()
 	m.r.ServeHTTP(w, r)
 	requests.Update(time.Now().Sub(start))
@@ -107,7 +104,7 @@ func (m *MessageServer) getMessage(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-func (m *MessageServer) fillCache(redisAddr string) {
+func (m *MessageServer) fillCache(redisAddr string, fast bool) {
 	f, err := os.Open("/data.json")
 	if err != nil {
 		logrus.Fatal(err)
@@ -122,7 +119,9 @@ func (m *MessageServer) fillCache(redisAddr string) {
 		m.cacheLock.Lock()
 		m.cache = append(m.cache, d)
 		m.cacheLock.Unlock()
-		time.Sleep(2 * time.Second)
+		if !fast {
+			time.Sleep(2 * time.Second)
+		}
 		f := (float64(i+1) / m.cacheSize) * 100.0
 		if _, err := m.do("SET", fmt.Sprintf("nodes.%s.fill", m.name), f); err != nil {
 			logrus.Error(err)

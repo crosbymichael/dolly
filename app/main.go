@@ -33,7 +33,7 @@ func main() {
 	if debug {
 		logrus.SetLevel(logrus.DebugLevel)
 	}
-	m, err := NewMessageServer(redisAddress)
+	m, err := NewMessageServer(redisAddress, debug)
 	if err != nil {
 		logrus.Fatal(err)
 	}
