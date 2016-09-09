@@ -31,6 +31,7 @@ echo 'Installing slave dependencies for ciru...'
         python \
         git-core \
         asciidoc \
+        xmlto \
         make 
 ) >> $LOGFILE
 
